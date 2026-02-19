@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif - Belajar Sukses</title>
+    <style>
+        :root {
+            --royal-blue: #002366;
+            --gold: #FFD700;
+            --light-bg: #f4f7f6;
+            --text-dark: #333;
+            --danger: #dc3545;
+            --success: #28a745;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background: var(--royal-blue);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 4px solid var(--gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { margin: 0; font-size: 1.2rem; }
+        .timer { font-weight: bold; background: var(--gold); color: var(--royal-blue); padding: 5px 10px; border-radius: 5px; }
+        
+        .screen { display: none; padding: 20px; flex-grow: 1; overflow-y: auto; }
+        .screen.active { display: block; }
+        
+        /* Login Screen */
+        .login-box { text-align: center; margin-top: 30vh; }
+        .login-box input { padding: 10px; font-size: 1.2rem; text-align: center; width: 200px; border: 2px solid var(--royal-blue); border-radius: 5px; }
+        .btn { background: var(--royal-blue); color: white; border: none; padding: 12px 20px; font-size: 1rem; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 15px; width: 100%; text-transform: uppercase; transition: 0.3s; }
+        .btn:hover { background: #001540; color: var(--gold); }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* Quiz Screen */
+        .wacana-container { background: #e9f2ff; border-left: 4px solid var(--royal-blue); padding: 15px; margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5; position: sticky; top: 0; z-index: 10; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-height: 200px; overflow-y: auto;}
+        .wacana-container img, .question-text img { max-width: 100%; height: auto; display: block; margin: 10px 0; border-radius: 5px; }
+        .question-card { background: white; padding: 0; }
+        .question-text { font-size: 1.1rem; margin-bottom: 15px; font-weight: 600; line-height: 1.4; }
+        
+        /* Options */
+        .option-label { display: block; background: var(--light-bg); padding: 12px 15px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ddd; cursor: pointer; transition: 0.2s; }
+        .option-label:hover { border-color: var(--royal-blue); background: #f0f5ff; }
+        .option-label input { margin-right: 10px; transform: scale(1.2); }
+        
+        /* BS Table */
+        .bs-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        .bs-table th, .bs-table td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        .bs-table td:first-child { text-align: left; }
+        .bs-table th { background: var(--royal-blue); color: white; }
+        
+        .footer-nav { padding: 20px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; background: white; }
+        
+        /* Results & Cert */
+        .result-box { text-align: center; margin-top: 20px; }
+        .score-circle { width: 150px; height: 150px; border-radius: 50%; background: var(--royal-blue); color: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: bold; margin: 0 auto 20px; border: 5px solid var(--gold); }
+        .copyright { text-align: center; padding: 10px; font-size: 0.8rem; color: #777; background: #eee; }
+        
+        .cert-container { display: none; padding: 40px; text-align: center; border: 10px solid var(--royal-blue); outline: 4px solid var(--gold); outline-offset: -10px; background: white; margin-top: 20px;}
+        .cert-container h1 { color: var(--royal-blue); font-family: 'Georgia', serif; font-size: 2.5rem; margin-bottom: 5px;}
+        .cert-container h3 { color: var(--gold); margin-top: 0; font-size: 1.5rem; }
+        
+        @media print {
+            body * { visibility: hidden; }
+            .cert-container, .cert-container * { visibility: visible; }
+            .cert-container { position: absolute; left: 0; top: 0; width: 100%; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1 id="kuis-title">Loading...</h1>
+        <div class="timer" id="timer-display">00:00</div>
+    </div>
+
+    <div id="screen-login" class="screen active">
+        <div class="login-box">
+            <h2 style="color: var(--royal-blue);">Selamat Datang</h2>
+            <p>Silakan masukkan PIN untuk memulai ujian.</p>
+            <input type="password" id="pin-input" placeholder="Masukkan PIN" autocomplete="off">
+            <button class="btn" onclick="startQuiz()">Mulai Ujian</button>
+            <p id="login-error" style="color: var(--danger); display: none; margin-top: 10px;">PIN Salah!</p>
+        </div>
+    </div>
+
+    <div id="screen-quiz" class="screen">
+        <div id="wacana-area"></div>
+        <div class="question-card">
+            <div style="margin-bottom: 10px; font-size: 0.9rem; color: #666; font-weight: bold;">Soal <span id="q-number">1</span> dari <span id="q-total">30</span></div>
+            <div id="question-area" class="question-text"></div>
+            <div id="options-area"></div>
+        </div>
+    </div>
+    
+    <div id="nav-area" class="footer-nav" style="display: none;">
+        <button class="btn" style="width: 48%; background: #666;" id="btn-prev" onclick="navQuestion(-1)">&#8592; Kembali</button>
+        <button class="btn" style="width: 48%;" id="btn-next" onclick="navQuestion(1)">Selanjutnya &#8594;</button>
+    </div>
+
+    <div id="screen-result" class="screen">
+        <div class="result-box">
+            <h2>Ujian Selesai!</h2>
+            <div class="score-circle" id="final-score">0</div>
+            <h3 id="result-msg"></h3>
+            <div id="cert-wrapper">
+                <button class="btn" onclick="window.print()">Cetak Sertifikat</button>
+                <div class="cert-container" id="certificate">
+                    <h1>SERTIFIKAT PENGHARGAAN</h1>
+                    <h3>Belajar Sukses</h3>
+                    <p>Diberikan kepada siswa atas penyelesaian:</p>
+                    <h2 id="cert-title"></h2>
+                    <p>Dengan Predikat Sangat Memuaskan (Nilai: <span id="cert-score"></span>)</p>
+                    <p style="margin-top: 40px; font-style: italic;">"Teruslah belajar dan raih cita-citamu!"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="copyright">&copy; <span id="year"></span> Belajar Sukses. Hak Cipta Dilindungi.</div>
+</div>
+
+<script>
+    // ==========================================
+    // 1. KONFIGURASI DATA UTAMA
+    // ==========================================
+    const JUDUL_KUIS = "LAIHAN TKA SD - BAHASA INDONESIA";
+    const PIN_AKSES = "SUKSES100%";
+    const WAKTU_MENIT = 75;
+    const TARGET_TOTAL_SOAL = 30;
+    const KKM = 80;
+
+    // RAW DATA (Copy-Paste dari instruksi)
+    const RAW_DATA = `
+--- START SOAL TUNGGAL --- 
+[Tipe: PG] Di dalam ekosistem laut yang sehat terdapat beragam biota laut yang hidup saling bergantungan. Makna istilah biologi yang dicetak tebal pada kalimat tersebut adalah... | Seluruh flora dan fauna di suatu wilayah ~ Kumpulan tumbuhan laut yang hidup di dasar karang ~ Jenis ikan pemakan plankton yang ukurannya kecil ~ Bebatuan karang tempat ikan bersembunyi | A | Biota adalah keseluruhan kehidupan flora dan fauna yang terdapat di dalam suatu daerah atau ekosistem tertentu.
+[Tipe: PG] Cuaca di padang rumput itu sangat terik pada siang hari sehingga tanahnya menjadi kering. Antonim dari kata sifat yang mendeskripsikan kondisi alam tersebut adalah... | Panas ~ Teduh ~ Cerah ~ Gersang | B | Antonim atau lawan kata dari terik (sangat panas) adalah teduh.
+[Tipe: BS] [IMG: https://i.ibb.co.com/Vpg4w2Hb/Gemini-Generated-Image-g2mg3pg2mg3pg2mg.png] Tentukan kebenaran pasangan kata teknis dan definisinya berikut ini berdasarkan infografis pelestarian lingkungan hidup: | Reboisasi adalah penanaman kembali hutan yang telah gundul (Benar) ~ Erosi adalah pengikisan permukaan bumi karena tenaga air atau angin (Benar) ~ Konservasi adalah kegiatan penebangan pohon secara liar (Salah) | - | Konservasi adalah pemeliharaan dan pelindungan secara teratur untuk mencegah kerusakan, bukan penebangan liar.
+[Tipe: PG] Keindahan pemandangan Pantai Kuta di sore hari sungguh menawan hati setiap turis asing yang datang. Makna konotatif positif dari frasa bercetak miring tersebut adalah... | Sangat indah dan menarik perhatian ~ Sangat luas dan cukup berbahaya ~ Sangat sepi dan menenangkan ~ Sangat ramai dan penuh sesak | A | Frasa 'menawan hati' memiliki konotasi positif yang berarti sangat menarik, memikat, atau indah dipandang.
+[Tipe: PG] Susunlah kata-kata acak berikut menjadi kalimat efektif yang benar: (1) membeli (2) apotek (3) ibu (4) di (5) obat. | 3-1-5-4-2 ~ 3-1-4-5-2 ~ 5-1-3-4-2 ~ 3-5-1-4-2 | A | Susunan kalimat efektif berpedoman pada pola Subjek-Predikat-Objek-Keterangan (S-P-O-K) yaitu "Ibu (3) membeli (1) obat (5) di (4) apotek (2)".
+[Tipe: PG] "Kemarin sore aku antri cukup lama saat membeli tiket di stasiun," kata paman. Penggunaan kata tidak baku dalam kalimat dialog tersebut jika diperbaiki menjadi kata baku adalah... | Antre ~ Mengantri ~ Antrian ~ Ngantri | A | Kata baku yang benar sesuai Pedoman Umum Ejaan Bahasa Indonesia (PUEBI) adalah "antre".
+[Tipe: PGK] Manakah kelompok kata di bawah ini yang seluruhnya termasuk dalam kosakata bidang olahraga sepak bola? | Gawang ~ Penalti ~ Kok ~ Servis | A, B | Gawang dan penalti adalah istilah dalam sepak bola. Kok dan servis adalah istilah dalam bulu tangkis/tenis.
+[Tipe: PG] Bacalah penggalan puisi anak berikut: "Di pagi hari yang cerah aku melihat seekor kupu-kupu hinggap di atas bunga yang sedang mekar." Makna denotatif dari kata yang dicetak tebal adalah... | Gadis desa yang sangat cantik rupawan ~ Bagian tumbuhan yang akan menjadi buah ~ Seseorang pahlawan yang menjadi idola ~ Hasil dari tabungan yang disimpan di bank | B | Makna denotatif adalah makna yang sebenarnya. Bunga dalam konteks alam merujuk pada bagian tumbuhan.
+[Tipe: PG] Aku adalah salah satu benda langit yang bercahaya. Aku memancarkan cahayaku sendiri yang sangat panas dan aku menjadi pusat tata surya. Benda langit apakah aku? | Bumi ~ Bulan ~ Bintang ~ Matahari | D | Matahari adalah bintang yang menjadi pusat tata surya dan memancarkan cahayanya sendiri.
+[Tipe: PG] Tanaman obat tradisional ini memiliki rimpang dengan bagian dalam berwarna kuning jingga. Masyarakat biasa memarut dan memeras airnya untuk dibuat jamu penambah nafsu makan atau meredakan nyeri perut. Nama tanaman obat tersebut adalah... | Jahe ~ Kencur ~ Kunyit ~ Lengkuas | C | Kunyit memiliki ciri khas warna rimpang kuning jingga dan biasa dipakai sebagai jamu tradisional.
+[Tipe: PG] Permainan tradisional anak-anak ini dilakukan dengan melompat menggunakan satu kaki pada kotak-kotak yang digambar di atas tanah. Sebelum melompat pemain harus melempar batu pipih atau gacuk ke dalam kotak. Nama permainan tradisional tersebut adalah... | Engklek ~ Gobak Sodor ~ Congklak ~ Petak Umpet | A | Ciri khas permainan engklek adalah melompat dengan satu kaki pada pola kotak di tanah menggunakan gacuk.
+[Tipe: BS] [IMG: Gambar Suling Bambu dan Gendang Kayu] Tentukan kebenaran klasifikasi cara memainkan alat musik berikut berdasarkan gambar: | Alat musik suling dimainkan dengan cara ditiup (Benar) ~ Alat musik gendang dimainkan dengan cara dipetik (Salah) | - | Suling adalah alat musik tiup. Gendang adalah alat musik ritmis yang dimainkan dengan cara dipukul. 
+[Tipe: PG] Bacalah teks berikut: "Pemerintah Kota Bandung menggelar festival seni budaya pada hari Minggu. Acara ini dihadiri oleh ribuan warga yang antusias melihat berbagai pertunjukan tradisional." Ringkasan yang paling tepat dalam satu kalimat efektif adalah... | Festival seni budaya di Bandung dihadiri ribuan warga. ~ Pemerintah Kota Bandung suka menonton pertunjukan tradisional. ~ Warga sangat antusias menggelar festival pada hari Minggu. ~ Acara tradisional banyak disukai oleh masyarakat luas. | A | Ringkasan merangkum inti informasi dari teks secara padat dan jelas.
+[Tipe: PG] [IMG: https://i.ibb.co.com/BK6f4ymT/Gemini-Generated-Image-igp8vjigp8vjigp8.png] Urutan langkah menyalakan televisi yang benar adalah: (1) Tekan tombol power di remote, (2) Colokkan kabel ke stopkontak, (3) Pilih saluran yang diinginkan. Susunan gambar panduan yang paling tepat adalah... | 2 - 1 - 3 ~ 1 - 2 - 3 ~ 3 - 2 - 1 ~ 2 - 3 - 1 | A | Logika menyalakan alat elektronik: hubungkan ke listrik dahulu, nyalakan mesin, baru operasikan fungsinya.
+[Tipe: PG] Susunlah paragraf acak berikut menjadi cerita yang padu! (1) Akhirnya, ia berhasil menemukan sumber air. (2) Si Kancil merasa sangat kehausan setelah berlari seharian. (3) Dengan cepat ia meminum air itu hingga puas. (4) Ia pun berjalan menyusuri hutan untuk mencari sungai. | 2 - 4 - 1 - 3 ~ 2 - 1 - 4 - 3 ~ 4 - 2 - 1 - 3 ~ 1 - 2 - 3 - 4 | A | Alur cerita yang logis: Kancil kehausan, lalu mencari sungai, menemukan sumber air, lalu meminumnya.
+--- END SOAL TUNGGAL ---
+
+--- START SOAL CLUSTER ---
+###
+[WACANA: Panduan Hidup Sehat di Musim Penghujan] Musim hujan telah tiba. Kondisi cuaca yang dingin dan lembap membuat daya tahan tubuh lebih mudah menurun. Akibatnya banyak warga yang terkena penyakit menular seperti flu dan diare. Setiap hari klinik kesehatan di desa selalu penuh oleh pasien yang ingin berobat dan menebus obat. Dokter menyarankan agar kita semua rajin mencuci tangan menggunakan sabun anti bakteri untuk mencegah penularan penyakit.
+[Tipe: PG] Istilah medis pasien pada teks tersebut memiliki makna khusus yaitu... | Orang yang membuat resep obat ~ Orang sakit yang dirawat oleh dokter ~ Petugas yang menjaga klinik ~ Dokter ahli penyakit dalam | B | Dalam bidang kesehatan, pasien berarti orang sakit yang sedang mendapat perawatan medis.
+[Tipe: PGK] Manakah kalimat yang mengandung kata kerja imperatif (perintah) pada teks prosedur kesehatan di atas? | Basahi tanganmu dengan air mengalir! ~ Musim hujan telah tiba. ~ Gunakan sabun secukupnya! ~ Setiap hari klinik selalu penuh. | A, C | Kata kerja imperatif berciri memberikan instruksi atau perintah (basahi, gunakan).
+###
+[WACANA: Perjalanan Sang Proklamator Bangsa] Bangsa Indonesia memiliki banyak pahlawan hebat. Salah satu yang paling dihormati adalah Ir. Soekarno atau yang akrab disapa Bung Karno. Beliau lahir pada tanggal 6 Juni 1901. Bung Karno dikenal memiliki ciri khas penampilan yang gagah.
+[Tipe: PG] Terdapat kata modern pada akhir paragraf teks tersebut. Sinonim atau persamaan kata umum dari kata tersebut adalah... | Mutakhir ~ Kuno ~ Tradisional ~ Usang | A | Modern bersinonim dengan mutakhir atau terbaru yang merujuk pada kemajuan masa kini.
+[Tipe: PG] Kata serapan momen yang digunakan pada teks sejarah tersebut memiliki arti... | Tempat pertemuan para pahlawan ~ Senjata untuk berperang ~ Waktu yang singkat atau kesempatan bersejarah ~ Kendaraan perang zaman dahulu | C | Momen adalah kata serapan dari bahasa asing yang berarti waktu yang pendek atau saat/kesempatan penting.
+[Tipe: PG] Berdasarkan teks biografi di atas, peristiwa sejarah yang tepat untuk melengkapi lini masa (timeline) pada titik tahun 1927 adalah... | Mendirikan Partai Nasional Indonesia ~ Menjadi Presiden Republik Indonesia Pertama ~ Menulis buku perjuangan di pengasingan ~ Lulus dari sekolah dasar di Surabaya | A | Pada paragraf kedua teks disebutkan bahwa tahun 1927 beliau mendirikan Partai Nasional Indonesia.
+###
+[WACANA: Rahasia Metamorfosis Katak Sawah] Siswa kelas 6 SD hari ini melakukan pengamatan tentang siklus hidup katak sawah. Katak termasuk hewan amfibi yang berarti bisa hidup di dua alam yaitu darat dan air.
+[Tipe: BS] Tentukan kebenaran informasi pengisian tabel hasil pengamatan berdasarkan teks: | Kolom tempat hidup berudu diisi dengan jawaban Air (Benar) ~ Kolom alat pernapasan katak dewasa diisi dengan jawaban Insang (Salah) | - | Berudu hidup di air, namun katak dewasa bernapas dengan paru-paru dan kulit (bukan insang).
+[Tipe: PG] Jika siswa menyusun klasifikasi hewan berdasar teks, katak ditempatkan pada cabang bagan pohon kelompok hewan yang mampu hidup di dua alam. Kelompok hewan tersebut dinamakan... | Mamalia ~ Aves ~ Reptil ~ Amfibi | D | Teks menyatakan secara jelas bahwa katak yang bisa hidup di darat dan air termasuk golongan amfibi.
+###
+--- END SOAL CLUSTER ---
+`;
+
+    // ==========================================
+    // 2. LOGIKA PARSING & MIXER
+    // ==========================================
+    let RAW_SINGLE = [];
+    let RAW_CLUSTER = [];
+    let finalQuestionList = [];
+    let bankCadangan = [];
+    let userAnswers = {};
+    let currentQIndex = 0;
+    let timerInterval;
+    let timeLeft = WAKTU_MENIT * 60;
+
+    document.getElementById('kuis-title').innerText = JUDUL_KUIS;
+    document.getElementById('year').innerText = new Date().getFullYear();
+
+    // Auto-Parser Engine
+    function parseRawData() {
+        const singleBlock = RAW_DATA.split('--- START SOAL TUNGGAL ---')[1]?.split('--- END SOAL TUNGGAL ---')[0] || "";
+        const clusterBlock = RAW_DATA.split('--- START SOAL CLUSTER ---')[1]?.split('--- END SOAL CLUSTER ---')[0] || "";
+
+        // Parse Singles
+        singleBlock.split('\n').forEach(line => {
+            if (line.trim().startsWith('[')) RAW_SINGLE.push(line.trim());
+        });
+
+        // Parse Clusters
+        clusterBlock.split('###').forEach(block => {
+            if (block.trim()) {
+                let lines = block.trim().split('\n');
+                let wacana = "";
+                let qs = [];
+                lines.forEach(l => {
+                    if (l.startsWith('[WACANA:')) wacana += l + "<br>";
+                    else if (l.trim().startsWith('[')) qs.push(l.trim());
+                });
+                if (qs.length > 0) RAW_CLUSTER.push({ wacana, questions: qs });
+            }
+        });
+    }
+
+    // Mixer Engine V7.0
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function generateMixer() {
+        let singlePool = shuffleArray([...RAW_SINGLE]);
+        let clusterPool = shuffleArray([...RAW_CLUSTER]);
+        
+        let qList = [];
+
+        // Helper: Ambil N single
+        const takeSingle = (n) => {
+            for(let i=0; i<n; i++) {
+                if(singlePool.length > 0) qList.push({ wacana: null, raw: singlePool.pop() });
+            }
+        };
+
+        // Helper: Ambil X soal dari cluster (Max 2 per cluster) sampai mencapai target N
+        const takeCluster = (targetN) => {
+            let count = 0;
+            while(count < targetN && clusterPool.length > 0) {
+                let cl = clusterPool.pop();
+                let qsToTake = Math.min(2, cl.questions.length);
+                
+                for(let i=0; i<qsToTake; i++) {
+                    if(count < targetN) {
+                        qList.push({ wacana: cl.wacana, raw: cl.questions[i] });
+                        count++;
+                    } else {
+                        // Sisa masuk cadangan
+                        bankCadangan.push({ wacana: cl.wacana, raw: cl.questions[i] });
+                    }
+                }
+                // Sisa soal di cluster yang tidak terambil masuk cadangan
+                for(let i=qsToTake; i<cl.questions.length; i++) {
+                    bankCadangan.push({ wacana: cl.wacana, raw: cl.questions[i] });
+                }
+            }
+        };
+
+        // Eksekusi Resep Mixer
+        takeSingle(3); // Q1-3 (Pemanasan)
+        takeCluster(7); // Q4-10 (Literasi A)
+        takeSingle(3); // Q11-13 (Selingan)
+        takeCluster(7); // Q14-20 (Literasi B)
+        
+        // Sisa soal (Q21-30) - Campuran
+        let remainingNeeded = TARGET_TOTAL_SOAL - qList.length;
+        if(remainingNeeded > 0) {
+            // Gabung sisa pool
+            let mixedPool = shuffleArray([...singlePool.map(s => ({wacana:null, raw:s}))]);
+            // Masukkan sisa cluster ke mixed pool (pecah wacananya)
+            clusterPool.forEach(cl => {
+                cl.questions.forEach(q => mixedPool.push({wacana: cl.wacana, raw: q}));
+            });
+            
+            for(let i=0; i<remainingNeeded; i++) {
+                if(mixedPool.length > 0) qList.push(mixedPool.pop());
+            }
+            // Sisa beneran masuk cadangan
+            bankCadangan.push(...mixedPool);
+        }
+
+        finalQuestionList = qList;
+        document.getElementById('q-total').innerText = finalQuestionList.length;
+    }
+
+    // ==========================================
+    // 3. RENDER ENGINE & UI
+    // ==========================================
+    function parseString(str) {
+        // Konversi [IMG: url] jadi tag gambar
+        return str.replace(/\[IMG:\s*(.+?)\]/g, '<img src="$1" alt="Gambar Soal">');
+    }
+
+    function renderQuestion(index) {
+        if(index < 0 || index >= finalQuestionList.length) return;
+        currentQIndex = index;
+        let qData = finalQuestionList[index];
+        let parts = qData.raw.split('|').map(s => s.trim());
+        
+        let typeMatch = parts[0].match(/\[Tipe:\s*([^\]]+)\]/);
+        let qType = typeMatch ? typeMatch[1] : 'PG';
+        let qText = parts[0].replace(/\[Tipe:\s*[^\]]+\]/, '').trim();
+        let optionsStr = parts[1] || "";
+
+        document.getElementById('q-number').innerText = index + 1;
+        document.getElementById('wacana-area').innerHTML = qData.wacana ? `<div class="wacana-container">${parseString(qData.wacana)}</div>` : '';
+        document.getElementById('question-area').innerHTML = parseString(qText);
+        
+        let optArea = document.getElementById('options-area');
+        optArea.innerHTML = '';
+
+        if (qType === 'BS') {
+            // Render UI Tabel Benar/Salah
+            let opts = optionsStr.split('~').map(s => s.trim());
+            let tableHTML = `<table class="bs-table"><tr><th>Pernyataan</th><th width="80">Benar</th><th width="80">Salah</th></tr>`;
+            
+            opts.forEach((opt, i) => {
+                // Ekstrak teks pernyataan, misal: "Api panas (Benar)" -> "Api panas"
+                let stmtMatch = opt.match(/(.+?)\s*\((Benar|Salah)\)/i);
+                let stmtText = stmtMatch ? stmtMatch[1] : opt;
+                
+                let savedAns = userAnswers[`${index}_${i}`] || "";
+                
+                tableHTML += `<tr>
+                    <td>${parseString(stmtText)}</td>
+                    <td><input type="radio" name="bs_${index}_${i}" value="Benar" onchange="saveAnswer('${index}_${i}', 'Benar')" ${savedAns==='Benar'?'checked':''}></td>
+                    <td><input type="radio" name="bs_${index}_${i}" value="Salah" onchange="saveAnswer('${index}_${i}', 'Salah')" ${savedAns==='Salah'?'checked':''}></td>
+                </tr>`;
+            });
+            tableHTML += `</table>`;
+            optArea.innerHTML = tableHTML;
+        } 
+        else if (qType === 'PGK') {
+            // Checkbox multi answer
+            let opts = optionsStr.split('~').map(s => s.trim());
+            opts.forEach((opt, i) => {
+                let val = String.fromCharCode(65 + i); // A, B, C...
+                let savedArr = userAnswers[index] || [];
+                optArea.innerHTML += `<label class="option-label">
+                    <input type="checkbox" name="q_${index}" value="${val}" onchange="saveAnswerPGK(${index}, '${val}', this.checked)" ${savedArr.includes(val)?'checked':''}> 
+                    ${val}. ${parseString(opt)}
+                </label>`;
+            });
+        }
+        else {
+            // Standar PG (Radio)
+            let opts = optionsStr.split('~').map(s => s.trim());
+            opts.forEach((opt, i) => {
+                let val = String.fromCharCode(65 + i);
+                let savedAns = userAnswers[index] || "";
+                optArea.innerHTML += `<label class="option-label">
+                    <input type="radio" name="q_${index}" value="${val}" onchange="saveAnswer('${index}', '${val}')" ${savedAns===val?'checked':''}> 
+                    ${val}. ${parseString(opt)}
+                </label>`;
+            });
+        }
+
+        // Tombol Navigasi
+        document.getElementById('btn-prev').style.visibility = index === 0 ? 'hidden' : 'visible';
+        
+        let btnNext = document.getElementById('btn-next');
+        if(index === finalQuestionList.length - 1) {
+            btnNext.innerText = "Selesai & Kumpulkan";
+            btnNext.style.background = "var(--success)";
+            btnNext.onclick = finishQuiz;
+        } else {
+            btnNext.innerText = "Selanjutnya \u2192";
+            btnNext.style.background = "var(--royal-blue)";
+            btnNext.onclick = () => navQuestion(1);
+        }
+    }
+
+    function saveAnswer(qKey, val) { userAnswers[qKey] = val; }
+    function saveAnswerPGK(qIndex, val, isChecked) {
+        if(!userAnswers[qIndex]) userAnswers[qIndex] = [];
+        if(isChecked) userAnswers[qIndex].push(val);
+        else userAnswers[qIndex] = userAnswers[qIndex].filter(v => v !== val);
+    }
+
+    function navQuestion(dir) {
+        // Validasi BS Wajib Isi
+        let qData = finalQuestionList[currentQIndex];
+        let qType = qData.raw.match(/\[Tipe:\s*([^\]]+)\]/)[1];
+        
+        if (dir === 1 && qType === 'BS') {
+            let optsCount = qData.raw.split('|')[1].split('~').length;
+            for(let i=0; i<optsCount; i++) {
+                if(!userAnswers[`${currentQIndex}_${i}`]) {
+                    alert("Harap pilih Benar/Salah untuk semua pernyataan sebelum melanjutkan!");
+                    return;
+                }
+            }
+        }
+        renderQuestion(currentQIndex + dir);
+    }
+
+    // ==========================================
+    // 4. SECURITY & SYSTEM FLOW
+    // ==========================================
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === 'hidden' && document.getElementById('screen-quiz').classList.contains('active')) {
+            alert("SISTEM ANTI-CURANG: Anda terdeteksi meninggalkan halaman ujian. Aktivitas ini dicatat oleh sistem Belajar Sukses.");
+        }
+    });
+
+    function formatTime(sec) {
+        let m = Math.floor(sec / 60).toString().padStart(2, '0');
+        let s = (sec % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    function startQuiz() {
+        if(document.getElementById('pin-input').value !== PIN_AKSES) {
+            document.getElementById('login-error').style.display = 'block';
+            return;
+        }
+        
+        parseRawData();
+        generateMixer();
+        
+        document.getElementById('screen-login').classList.remove('active');
+        document.getElementById('screen-quiz').classList.add('active');
+        document.getElementById('nav-area').style.display = 'flex';
+        
+        renderQuestion(0);
+        document.getElementById('timer-display').innerText = formatTime(timeLeft);
+        
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timer-display').innerText = formatTime(timeLeft);
+            if(timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert("Waktu habis! Jawaban akan dikumpulkan otomatis.");
+                finishQuiz();
+            }
+        }, 1000);
+    }
+
+    function finishQuiz() {
+        clearInterval(timerInterval);
+        
+        // Kalkulasi Skor
+        let totalBenar = 0;
+        
+        finalQuestionList.forEach((q, index) => {
+            let parts = q.raw.split('|').map(s => s.trim());
+            let qType = parts[0].match(/\[Tipe:\s*([^\]]+)\]/)[1];
+            let kunci = parts[2] ? parts[2].replace(/\s/g, '') : ''; // Hapus spasi "A,B" -> "A,B"
+            
+            if (qType === 'BS') {
+                let isAllCorrect = true;
+                let opts = parts[1].split('~').map(s => s.trim());
+                opts.forEach((opt, i) => {
+                    let kunciBaris = opt.match(/\((Benar|Salah)\)/i)[1];
+                    if(userAnswers[`${index}_${i}`] !== kunciBaris) isAllCorrect = false;
+                });
+                if(isAllCorrect) totalBenar++;
+            } 
+            else if (qType === 'PGK') {
+                let ansArr = userAnswers[index] || [];
+                let keyArr = kunci.split(',');
+                if(ansArr.length === keyArr.length && ansArr.every(v => keyArr.includes(v))) totalBenar++;
+            } 
+            else {
+                if(userAnswers[index] === kunci) totalBenar++;
+            }
+        });
+
+        let finalScore = Math.round((totalBenar / finalQuestionList.length) * 100);
+        
+        document.getElementById('screen-quiz').classList.remove('active');
+        document.getElementById('nav-area').style.display = 'none';
+        document.getElementById('screen-result').classList.add('active');
+        
+        let scoreEl = document.getElementById('final-score');
+        scoreEl.innerText = finalScore;
+        
+        let msgEl = document.getElementById('result-msg');
+        if(finalScore >= KKM) {
+            msgEl.innerText = "Luar Biasa! Anda melampaui KKM.";
+            msgEl.style.color = "var(--success)";
+            document.getElementById('cert-wrapper').style.display = 'block';
+            document.getElementById('cert-title').innerText = JUDUL_KUIS;
+            document.getElementById('cert-score').innerText = finalScore;
+        } else {
+            msgEl.innerText = "Tetap semangat! Nilai Anda belum mencapai KKM (" + KKM + ").";
+            msgEl.style.color = "var(--danger)";
+            document.getElementById('cert-wrapper').style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>
