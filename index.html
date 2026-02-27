@@ -97,23 +97,36 @@
         .review-item.wrong { border-left: 5px solid var(--danger); }
         .pembahasan { background: #eef2f7; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 0.95rem; border: 1px dashed var(--primary); }
 
-        /* Premium Demo Styles */
+        /* Premium Demo Styles & Animations */
         .premium-lock-container { position: relative; display: inline-block; margin: 0 auto 20px; }
         .blur-effect { filter: blur(8px); user-select: none; }
         .lock-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--danger); font-weight: bold; font-size: 1.5rem; background: rgba(255,255,255,0.4); border-radius: 50%; z-index: 10; }
         
-        .premium-cta { background: #fffbe6; border: 2px dashed var(--accent); padding: 25px 20px; border-radius: 8px; margin-bottom: 25px; text-align: center; }
-        .premium-cta h3 { color: var(--primary); margin-top: 0; font-size: 1.4rem; }
-        .premium-cta p { font-size: 1rem; color: #555; line-height: 1.5; }
-        .btn-premium { background: var(--primary); color: var(--accent); text-decoration: none; padding: 14px 24px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; display: inline-block; margin-top: 15px; transition: transform 0.2s, background 0.2s; box-shadow: 0 4px 10px rgba(15, 61, 129, 0.3); border: none; cursor: pointer; width: 100%; }
-        .btn-premium:hover { transform: translateY(-3px); background: #164e9e; color: #fff; }
+        .premium-cta { background: linear-gradient(135deg, #fffbe6, #fff); border: 2px dashed var(--accent); padding: 30px 20px; border-radius: 12px; margin-bottom: 25px; text-align: center; box-shadow: 0 5px 15px rgba(212, 175, 55, 0.15); }
+        .premium-cta h3 { color: var(--primary); margin-top: 0; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
+        .premium-cta p { font-size: 1rem; color: #555; line-height: 1.6; margin-bottom: 15px; }
+        
+        /* Harga Styles */
+        .price-box { margin: 15px 0; padding: 10px; background: rgba(212, 175, 55, 0.1); border-radius: 8px; }
+        .harga-coret { text-decoration: line-through; color: var(--danger); font-size: 1.2rem; font-weight: normal; margin-right: 15px; opacity: 0.8; }
+        .harga-diskon { color: var(--success); font-size: 1.8rem; font-weight: 900; }
+
+        /* Button Animation */
+        @keyframes pulse-btn {
+            0% { transform: scale(1); box-shadow: 0 4px 10px rgba(15, 61, 129, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 8px 25px rgba(212, 175, 55, 0.7); }
+            100% { transform: scale(1); box-shadow: 0 4px 10px rgba(15, 61, 129, 0.3); }
+        }
+        
+        .btn-premium { background: var(--primary); color: var(--accent); text-decoration: none; padding: 16px 24px; border-radius: 50px; font-size: 1.2rem; font-weight: 900; display: inline-block; margin-top: 15px; transition: background 0.3s; border: 2px solid var(--primary); width: 100%; animation: pulse-btn 2s infinite; text-transform: uppercase; }
+        .btn-premium:hover { background: #164e9e; color: #fff; animation: none; transform: scale(1.02); }
 
         .affiliate-section { text-align: left; background: var(--white); padding: 20px; border-radius: 8px; border: 1px solid var(--gray); margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .affiliate-item { display: flex; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .affiliate-item { display: flex; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #ccc; }
         .affiliate-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .affiliate-item img { width: 70px; height: 90px; object-fit: cover; margin-right: 15px; border-radius: 4px; border: 1px solid #ddd; }
-        .btn-shopee { background: #ee4d2d; color: white; text-decoration: none; padding: 8px 15px; border-radius: 4px; font-size: 0.9rem; font-weight: bold; display: inline-block; margin-top: 8px; transition: 0.2s; }
-        .btn-shopee:hover { background: #d73a1e; }
+        .affiliate-item img { width: 75px; height: 100px; object-fit: cover; margin-right: 15px; border-radius: 6px; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-shopee { background: linear-gradient(90deg, #ee4d2d, #ff7337); color: white; text-decoration: none; padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; display: inline-block; margin-top: 8px; transition: 0.2s; box-shadow: 0 2px 5px rgba(238, 77, 45, 0.3); }
+        .btn-shopee:hover { background: linear-gradient(90deg, #d73a1e, #ee4d2d); transform: translateY(-2px); }
 
         /* Footer */
         .footer { text-align: center; padding: 10px; background: var(--primary); color: var(--white); font-size: 0.8rem; position: fixed; bottom: 0; width: 100%; z-index: 1000; }
@@ -125,6 +138,7 @@
             .main-content .bottom-nav { right: 0; }
             .mobile-drawer-btn { display: block; }
             .app-header h1 { font-size: 1rem; }
+            .harga-coret { display: block; margin-right: 0; margin-bottom: 5px; }
         }
     </style>
 </head>
@@ -192,27 +206,33 @@
                 <h3>Buka Kunci Fitur Penuh!</h3>
                 <p>Ingin melihat Skor Akhir, Unduh Sertifikat, Pembahasan Lengkap, dan berlatih lebih banyak lagi?<br><br>
                 Dapatkan <strong>Akses Fitur Premium & E-Book Bank Soal (Lebih dari 300 Soal)</strong> sekarang juga!</p>
-                <a href="LINK_PRODUK_DIGITAL_ANDA_DI_SINI" target="_blank" class="btn-premium">Beli Paket Premium & Bank Soal</a>
+                
+                <div class="price-box">
+                    <span class="harga-coret" id="uiHargaCoret">Rp 0</span>
+                    <span class="harga-diskon" id="uiHargaDiskon">Rp 0</span>
+                </div>
+
+                <a href="#" target="_blank" class="btn-premium" id="uiLinkPremium">🚀 Beli Paket Premium Sekarang</a>
             </div>
 
             <div class="affiliate-section">
                 <h4 style="margin-top:0; margin-bottom: 15px; color:var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 10px;">📚 Rekomendasi Buku Penunjang Belajar:</h4>
                 
                 <div class="affiliate-item">
-                    <img src="https://via.placeholder.com/70x90/0F3D81/D4AF37?text=Buku+1" alt="Buku Rekomendasi 1">
+                    <img src="" alt="Buku Rekomendasi 1" id="uiBuku1Img">
                     <div>
-                        <strong style="font-size: 1rem; color: #333;">Buku Sukses Ujian SD Vol. 1</strong><br>
-                        <span style="font-size: 0.8rem; color: #666;">Buku latihan soal lengkap dengan ringkasan materi.</span><br>
-                        <a href="LINK_SHOPEE_AFFILIATE_1_DI_SINI" target="_blank" class="btn-shopee">🛒 Beli di Shopee</a>
+                        <strong style="font-size: 1rem; color: #333;" id="uiBuku1Judul">Judul Buku 1</strong><br>
+                        <span style="font-size: 0.8rem; color: #666;" id="uiBuku1Deskripsi">Deskripsi Buku 1</span><br>
+                        <a href="#" target="_blank" class="btn-shopee" id="uiBuku1Link">🛒 Beli di Shopee</a>
                     </div>
                 </div>
                 
                 <div class="affiliate-item">
-                    <img src="https://via.placeholder.com/70x90/0F3D81/D4AF37?text=Buku+2" alt="Buku Rekomendasi 2">
+                    <img src="" alt="Buku Rekomendasi 2" id="uiBuku2Img">
                     <div>
-                        <strong style="font-size: 1rem; color: #333;">Bank Soal Terlengkap SD Tembus Nilai 100</strong><br>
-                        <span style="font-size: 0.8rem; color: #666;">Kumpulan ribuan soal HOTS terbaru.</span><br>
-                        <a href="LINK_SHOPEE_AFFILIATE_2_DI_SINI" target="_blank" class="btn-shopee">🛒 Beli di Shopee</a>
+                        <strong style="font-size: 1rem; color: #333;" id="uiBuku2Judul">Judul Buku 2</strong><br>
+                        <span style="font-size: 0.8rem; color: #666;" id="uiBuku2Deskripsi">Deskripsi Buku 2</span><br>
+                        <a href="#" target="_blank" class="btn-shopee" id="uiBuku2Link">🛒 Beli di Shopee</a>
                     </div>
                 </div>
             </div>
@@ -227,12 +247,49 @@
 
     <script>
         // ==========================================
-        // KONFIGURASI DATA UTAMA
+        // KONFIGURASI DATA UTAMA & PRODUK
+        // SILAKAN EDIT DATA DI BAWAH INI
         // ==========================================
         const JUDUL_KUIS = "TKA SD - BAHASA INDONESIA (DEMO)";
         const PIN_AKSES = "SUKSESBELAJAR100%";
         const WAKTU_MENIT = 70;
         const TARGET_TOTAL_SOAL = 30;
+
+        // --- KONFIGURASI PRODUK PREMIUM (E-BOOK / BANK SOAL) ---
+        const LINK_PRODUK_PREMIUM = "https://link-penjualan-produk-digital-anda.com"; 
+        const HARGA_CORET = "Rp 150.000"; // Harga normal (ditampilkan dicoret merah)
+        const HARGA_DISKON = "Rp 49.000"; // Harga spesial (ditampilkan hijau besar)
+
+        // --- KONFIGURASI BUKU 1 (SHOPEE AFFILIATE) ---
+        const BUKU_1_JUDUL = "Buku Sukses Ujian SD Vol. 1";
+        const BUKU_1_DESK = "Buku latihan soal lengkap dengan ringkasan materi dan kunci jawaban.";
+        const BUKU_1_IMG = "https://via.placeholder.com/75x100/0F3D81/D4AF37?text=Buku+1"; // Ganti dengan link gambar asli dari Shopee
+        const BUKU_1_LINK = "https://shope.ee/link_affiliate_anda_1";
+
+        // --- KONFIGURASI BUKU 2 (SHOPEE AFFILIATE) ---
+        const BUKU_2_JUDUL = "Bank Soal Terlengkap SD Tembus Nilai 100";
+        const BUKU_2_DESK = "Kumpulan ribuan soal HOTS terbaru sesuai kurikulum berjalan.";
+        const BUKU_2_IMG = "https://via.placeholder.com/75x100/0F3D81/D4AF37?text=Buku+2"; // Ganti dengan link gambar asli dari Shopee
+        const BUKU_2_LINK = "https://shope.ee/link_affiliate_anda_2";
+
+
+        // ==========================================
+        // AUTO-INJECT KONFIGURASI KE DALAM TAMPILAN HTML
+        // ==========================================
+        document.getElementById('uiHargaCoret').innerText = HARGA_CORET;
+        document.getElementById('uiHargaDiskon').innerText = HARGA_DISKON;
+        document.getElementById('uiLinkPremium').href = LINK_PRODUK_PREMIUM;
+
+        document.getElementById('uiBuku1Judul').innerText = BUKU_1_JUDUL;
+        document.getElementById('uiBuku1Deskripsi').innerText = BUKU_1_DESK;
+        document.getElementById('uiBuku1Img').src = BUKU_1_IMG;
+        document.getElementById('uiBuku1Link').href = BUKU_1_LINK;
+
+        document.getElementById('uiBuku2Judul').innerText = BUKU_2_JUDUL;
+        document.getElementById('uiBuku2Deskripsi').innerText = BUKU_2_DESK;
+        document.getElementById('uiBuku2Img').src = BUKU_2_IMG;
+        document.getElementById('uiBuku2Link').href = BUKU_2_LINK;
+
 
         // ==========================================
         // DATA RAW INJECTION (DARI PROMPT)
@@ -580,7 +637,6 @@ Raja Hutan baru saja kehilangan barang paling berharganya. Barang itu bukan seka
         }
 
         function startExam() {
-            // Perbaikan PIN: Menghapus spasi di awal/akhir dan mengabaikan huruf besar/kecil
             let input = document.getElementById("pinInput").value.trim().toUpperCase();
             if(input === PIN_AKSES.toUpperCase()) {
                 document.getElementById('loginScreen').classList.add('hidden');
