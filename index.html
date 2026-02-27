@@ -139,7 +139,7 @@
                 <span class="toggle-password" onclick="togglePin()">Lihat</span>
             </div>
             <button class="btn-start" onclick="startExam()">MULAI UJIAN</button>
-            <p style="color:red; font-size: 14px; display:none;" id="pinError">PIN Salah!</p>
+            <p style="color:red; font-size: 14px; display:none;" id="pinError">PIN Salah! Pastikan penulisan sudah benar.</p>
         </div>
     </div>
 
@@ -185,11 +185,12 @@
             
             <p id="resultMessage" style="font-weight: bold; margin-bottom: 20px; color: #dc3545;">Skor Anda disembunyikan pada versi Demo.</p>
             
-            <button class="btn-nav btn-next" onclick="alertPremium()" style="margin-bottom: 20px; width: 100%; background-color: var(--danger);">Lihat Pembahasan 🔒</button>
+            <button class="btn-nav btn-next" onclick="alertPremium()" style="margin-bottom: 10px; width: 100%; background-color: var(--danger);">Lihat Pembahasan 🔒</button>
+            <button class="btn-nav btn-submit" onclick="alertPremium()" style="margin-bottom: 20px; width: 100%; background-color: var(--danger);">Unduh Sertifikat 🔒</button>
 
             <div class="premium-cta">
                 <h3>Buka Kunci Fitur Penuh!</h3>
-                <p>Ingin melihat Skor Akhir Anda, Pembahasan Lengkap seluruh soal, dan berlatih lebih banyak lagi?<br><br>
+                <p>Ingin melihat Skor Akhir, Unduh Sertifikat, Pembahasan Lengkap, dan berlatih lebih banyak lagi?<br><br>
                 Dapatkan <strong>Akses Fitur Premium & E-Book Bank Soal (Lebih dari 300 Soal)</strong> sekarang juga!</p>
                 <a href="LINK_PRODUK_DIGITAL_ANDA_DI_SINI" target="_blank" class="btn-premium">Beli Paket Premium & Bank Soal</a>
             </div>
@@ -216,7 +217,6 @@
                 </div>
             </div>
 
-            <button class="btn-nav btn-submit hidden" id="btnSertifikat" onclick="generateSertifikat()" style="width: 100%;">Unduh Sertifikat</button>
             <div id="reviewContainer" class="review-box hidden"></div>
         </div>
     </div>
@@ -580,8 +580,9 @@ Raja Hutan baru saja kehilangan barang paling berharganya. Barang itu bukan seka
         }
 
         function startExam() {
-            let input = document.getElementById("pinInput").value;
-            if(input === PIN_AKSES) {
+            // Perbaikan PIN: Menghapus spasi di awal/akhir dan mengabaikan huruf besar/kecil
+            let input = document.getElementById("pinInput").value.trim().toUpperCase();
+            if(input === PIN_AKSES.toUpperCase()) {
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('appScreen').classList.remove('hidden');
                 
@@ -808,68 +809,14 @@ Raja Hutan baru saja kehilangan barang paling berharganya. Barang itu bukan seka
                 if(isCorrect) correctCount++;
             });
 
-            // Kalkulasi nilai tetap berjalan di balik layar untuk jaga-jaga, tapi tampilan di blur
+            // Kalkulasi nilai tetap berjalan di balik layar
             finalScoreValue = Math.round((correctCount / finalQuestionList.length) * 100);
             document.getElementById('finalScore').innerText = finalScoreValue; 
-            
-            // Catatan: Tombol sertifikat dan logic KKM disembunyikan untuk versi demo ini.
-            document.getElementById('btnSertifikat').classList.add('hidden');
         }
 
-        // FUNGSI ALERT UNTUK FITUR PREMIUM (MENGGANTIKAN showReview())
+        // FUNGSI ALERT UNTUK FITUR PREMIUM (MENGGANTIKAN showReview() dan generateSertifikat())
         function alertPremium() {
-            alert("Fitur Pembahasan dan Skor Akhir terkunci!\n\nSilakan tingkatkan ke versi Premium untuk melihat pembahasan lengkap semua soal, mengetahui nilai asli Anda, dan mendapatkan ratusan bank soal tambahan.");
-        }
-
-        function generateSertifikat() {
-            // Pembuatan Sertifikat Sederhana menggunakan manipulasi canvas HTML5
-            const canvas = document.createElement('canvas');
-            canvas.width = 800;
-            canvas.height = 600;
-            const ctx = canvas.getContext('2d');
-
-            // Background
-            ctx.fillStyle = '#0F3D81';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(10, 10, canvas.width - 20, canvas.height - 20);
-            
-            // Border Emas
-            ctx.strokeStyle = '#D4AF37';
-            ctx.lineWidth = 10;
-            ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-
-            // Teks Sertifikat
-            ctx.textAlign = 'center';
-            ctx.fillStyle = '#0F3D81';
-            
-            ctx.font = 'bold 40px Arial';
-            ctx.fillText('SERTIFIKAT PENGHARGAAN', canvas.width / 2, 120);
-            
-            ctx.font = '20px Arial';
-            ctx.fillText('Diberikan kepada siswa/i yang telah menyelesaikan:', canvas.width / 2, 200);
-            
-            ctx.font = 'bold 30px Arial';
-            ctx.fillStyle = '#D4AF37';
-            ctx.fillText(JUDUL_KUIS, canvas.width / 2, 250);
-
-            ctx.fillStyle = '#333';
-            ctx.font = '20px Arial';
-            ctx.fillText('Dengan Nilai Akhir:', canvas.width / 2, 350);
-
-            ctx.font = 'bold 80px Arial';
-            ctx.fillStyle = '#28a745';
-            ctx.fillText(finalScoreValue, canvas.width / 2, 450);
-
-            ctx.font = 'italic 18px Arial';
-            ctx.fillStyle = '#555';
-            ctx.fillText('Diselenggarakan oleh Belajar Sukses © 2026', canvas.width / 2, 540);
-
-            // Trigger Download
-            const link = document.createElement('a');
-            link.download = `Sertifikat_${JUDUL_KUIS}_Nilai_${finalScoreValue}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
+            alert("Fitur Terkunci!\n\nSilakan tingkatkan ke versi Premium untuk melihat Skor Akhir, mengunduh Sertifikat, melihat Pembahasan, dan mendapatkan ratusan Bank Soal tambahan.");
         }
     </script>
 </body>
